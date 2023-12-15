@@ -4224,7 +4224,7 @@
     (property "Reference" "J1" (id 0) (at 156.972 71.5553 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "USB_A" (id 1) (at 156.972 74.0922 0)
+    (property "Value" "USBA DS1095B-R" (id 1) (at 156.972 74.0922 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Connector_USB:USB_A_CONNFLY_DS1095-WNR0" (id 2) (at 147.32 73.66 0)
@@ -4638,7 +4638,7 @@
     (property "Reference" "C29" (id 0) (at 121.92 167.005 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "10n" (id 1) (at 131.826 168.7072 0)
+    (property "Value" "1n 2kV" (id 1) (at 131.826 168.7072 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (id 2) (at 129.8702 170.815 0)
@@ -5452,8 +5452,8 @@
     (pin "7" (uuid f0f2bb50-ae94-401b-a32a-f8bcb51a908c))
     (pin "8" (uuid fb51e4b3-6468-439a-9e84-26ede101ddc6))
     (pin "9" (uuid 827e153d-e58b-4062-9079-faaa34165d7d))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dc9e))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dc9e))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dc9f))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dc9f))
   )
 
   (symbol (lib_id "Device:LED") (at 152.4 29.845 90) (unit 1)
@@ -5732,7 +5732,7 @@
       (reference "C28") (unit 1) (value "1u") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/763d8361-8986-45bf-b18b-0b17b4962c9b"
-      (reference "C29") (unit 1) (value "10n") (footprint "Capacitor_SMD:C_0805_2012Metric")
+      (reference "C29") (unit 1) (value "1n 2kV") (footprint "Capacitor_SMD:C_0805_2012Metric")
     )
     (path "/67255374-0f11-491c-9146-82123903f89b"
       (reference "D1") (unit 1) (value "MAX3421") (footprint "Package_QFP:PQFP-32_5x5mm_P0.5mm")
@@ -5750,7 +5750,7 @@
       (reference "D5") (unit 1) (value "MB6S") (footprint "Package_TO_SOT_SMD:TO-269AA")
     )
     (path "/440b4971-7b5b-47ed-ad44-551052a4160f"
-      (reference "J1") (unit 1) (value "USB_A") (footprint "Connector_USB:USB_A_CONNFLY_DS1095-WNR0")
+      (reference "J1") (unit 1) (value "USBA DS1095B-R") (footprint "Connector_USB:USB_A_CONNFLY_DS1095-WNR0")
     )
     (path "/e9da7ccc-3797-430a-9dc0-42cc3a5fb4ee"
       (reference "J2") (unit 1) (value "gnd") (footprint "lib:conn_mini")

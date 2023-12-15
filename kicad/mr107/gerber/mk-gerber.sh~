@@ -1,19 +1,19 @@
 #!/bin/bash
 
-TARGET=
+TARGET=mr107
 
-if [ -f Meteostation.zip ]; then
-	rm Meteostation.zip
+if [ -f $TARGET.zip ]; then
+	rm $TARGET.zip
 fi
-mv SC-STM32L412K8-B_Cu.gbr Bottom.gbr
-mv SC-STM32L412K8-B_Mask.gbr MaskBottom.gbr
-if [ -f SC-STM32L412K8-PTH.drl ]; then
-	mv SC-STM32L412K8.drl NCData.drl
+if [ -f $TARGET-PTH.drl ]; then
+	mv $TARGET.drl NCData.drl
 else
-	mv SC-STM32L412K8.drl NCData.drl
+	mv $TARGET.drl NCData.drl
 fi
-mv SC-STM32L412K8-F_Cu.gbr Top.gbr
-mv SC-STM32L412K8-F_Mask.gbr MaskTop.gbr
-mv SC-STM32L412K8-Edge_Cuts.gbr Border.gbr
-zip SC-STM32L412K8.zip Border.gbr Bottom.gbr MaskBottom.gbr MaskTop.gbr NCData.drl Top.gbr
+mv $TARGET-B_Cu.gbr Bottom.gbr
+mv $TARGET-B_Mask.gbr MaskBottom.gbr
+mv $TARGET-F_Cu.gbr Top.gbr
+mv $TARGET-F_Mask.gbr MaskTop.gbr
+mv $TARGET-Edge_Cuts.gbr Border.gbr
+zip $TARGET.zip Border.gbr Bottom.gbr MaskBottom.gbr MaskTop.gbr NCData.drl Top.gbr
 

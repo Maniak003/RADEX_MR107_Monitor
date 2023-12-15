@@ -158,7 +158,6 @@ void setup() {
   pinMode(ETH_SS, OUTPUT);
   digitalWrite(ETH_SS, HIGH);
   
-
   #if wdt_on
     wdt_disable();
   #endif

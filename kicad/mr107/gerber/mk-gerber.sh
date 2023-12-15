@@ -6,7 +6,7 @@ if [ -f $TARGET.zip ]; then
 	rm $TARGET.zip
 fi
 if [ -f $TARGET-PTH.drl ]; then
-	mv $TARGET.drl NCData.drl
+	mv $TARGET-PTH.drl NCData.drl
 else
 	mv $TARGET.drl NCData.drl
 fi
