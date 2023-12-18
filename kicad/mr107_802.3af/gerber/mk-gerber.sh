@@ -16,4 +16,4 @@ mv $TARGET-F_Cu.gbr Top.gbr
 mv $TARGET-F_Mask.gbr MaskTop.gbr
 mv $TARGET-Edge_Cuts.gbr Border.gbr
 zip $TARGET.zip Border.gbr Bottom.gbr MaskBottom.gbr MaskTop.gbr NCData.drl Top.gbr
-
+rm *.gbr *.drl *.gbrjob
