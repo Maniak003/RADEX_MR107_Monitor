@@ -42,6 +42,7 @@ zakaz@quarta-rad.ru
 
 #include <cdcacm.h>
 #include <usbhub.h>
+#define PIN_SPI_SS_ETHERNET_LIB 6
 #include <Ethernet.h>
 //#include "pgmstrings.h"
 
