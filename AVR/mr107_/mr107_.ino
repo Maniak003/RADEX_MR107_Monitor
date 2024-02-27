@@ -1,4 +1,8 @@
 /*
+ 
+Компилировать Arduino NANO
+Прошивать: avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
+
 Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
 
 Сырые данные при горячем старте:
@@ -36,7 +40,6 @@ zakaz@quarta-rad.ru
 #define LED_CHK 4
 #define ETH_RESET A4
 #define USB_RESET 10
-#define ETH_SS 6
 #define MACADDR { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x31 }
 #define SERIAL_OUT
 
@@ -156,8 +159,8 @@ void setup() {
   pinMode(ETH_RESET, OUTPUT);
   digitalWrite(ETH_RESET, LOW);
   digitalWrite(ETH_RESET, HIGH);
-  pinMode(ETH_SS, OUTPUT);
-  digitalWrite(ETH_SS, HIGH);
+  pinMode(PIN_SPI_SS_ETHERNET_LIB, OUTPUT);
+  digitalWrite(PIN_SPI_SS_ETHERNET_LIB, HIGH);
   
   #if wdt_on
     wdt_disable();
@@ -177,7 +180,7 @@ void setup() {
   #if !defined(__MIPSEL__)
     while (!Serial); // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
   #endif
-  //Ethernet.init(ETH_SS);
+  Ethernet.init(PIN_SPI_SS_ETHERNET_LIB);
   #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
     if (Ethernet.begin() == 0) {
   #else
