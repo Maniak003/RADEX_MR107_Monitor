@@ -163,6 +163,7 @@ void setup() {
   digitalWrite(PIN_SPI_SS_ETHERNET_LIB, HIGH);
   
   #if wdt_on
+    MCUSR &= ~(1 << WDRF);
     wdt_disable();
   #endif
   #ifdef SERIAL_OUT
