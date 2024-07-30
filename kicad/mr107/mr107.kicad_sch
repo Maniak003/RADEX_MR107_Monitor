@@ -3839,7 +3839,7 @@
     (property "Reference" "J8" (id 0) (at 67.3862 81.7153 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "Value" "gnd" (id 1) (at 67.945 82.55 0)
+    (property "Value" "TxD" (id 1) (at 67.945 82.55 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
     (property "Footprint" "lib:conn_mini" (id 2) (at 67.945 86.36 0)
@@ -5295,7 +5295,7 @@
     (property "Reference" "J2" (id 0) (at 67.3862 79.1753 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
-    (property "Value" "gnd" (id 1) (at 67.945 80.01 0)
+    (property "Value" "RxD" (id 1) (at 67.945 80.01 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
     (property "Footprint" "lib:conn_mini" (id 2) (at 67.945 83.82 0)
@@ -5452,8 +5452,8 @@
     (pin "7" (uuid f0f2bb50-ae94-401b-a32a-f8bcb51a908c))
     (pin "8" (uuid fb51e4b3-6468-439a-9e84-26ede101ddc6))
     (pin "9" (uuid 827e153d-e58b-4062-9079-faaa34165d7d))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca0))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca0))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca1))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca1))
   )
 
   (symbol (lib_id "Device:LED") (at 152.4 29.845 90) (unit 1)
@@ -5753,7 +5753,7 @@
       (reference "J1") (unit 1) (value "USBA DS1095B-R") (footprint "Connector_USB:USB_A_CONNFLY_DS1095-WNR0")
     )
     (path "/e9da7ccc-3797-430a-9dc0-42cc3a5fb4ee"
-      (reference "J2") (unit 1) (value "gnd") (footprint "lib:conn_mini")
+      (reference "J2") (unit 1) (value "RxD") (footprint "lib:conn_mini")
     )
     (path "/b1b279b2-1c2b-42de-b5c3-1ee4e48562f8"
       (reference "J3") (unit 1) (value "mosi") (footprint "lib:conn_mini")
@@ -5771,7 +5771,7 @@
       (reference "J7") (unit 1) (value "gnd") (footprint "lib:conn_mini")
     )
     (path "/10cdcf9b-9a0c-40bc-b22a-126eaa868ca7"
-      (reference "J8") (unit 1) (value "gnd") (footprint "lib:conn_mini")
+      (reference "J8") (unit 1) (value "TxD") (footprint "lib:conn_mini")
     )
     (path "/e018ac67-8fcb-4fb8-82e0-2d9626cab1ff"
       (reference "J9") (unit 1) (value "PW") (footprint "lib:conn_mini")

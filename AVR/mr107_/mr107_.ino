@@ -1,6 +1,6 @@
 /*
  
-Компилировать Arduino NANO
+Компилировать как Arduino Pro mini 3.3v 8MHz
 Прошивать: avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
 
 Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
@@ -168,6 +168,8 @@ void setup() {
   #endif
   #ifdef SERIAL_OUT
     Serial.begin( 9600 );
+    Serial.print("CPU clock: ");
+    Serial.println(F_CPU);
     Serial.println("Eth init");
   #endif
   pinMode(USBHOSTSS, OUTPUT);
