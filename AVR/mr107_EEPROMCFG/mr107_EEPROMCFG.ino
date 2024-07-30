@@ -32,10 +32,11 @@ zakaz@quarta-rad.ru
 #define ZABBIXMAXLEN 128
 #define ZABBIXAGHOST "MR"         // Zabbix item's host name
 #define ZABBIXSENDPERIOD 300      // Period in secoonds
-#define ZABBRADONKEY "r"
-#define ZABBTEMPERATUREKEY "t"
-#define ZABBHUMMIDITYKEY "h"
-#define ZABBPRESSUREKEY "p"
+#define ZABBRADONKEY "rad"
+#define ZABBTEMPERATUREKEY "tem"
+#define ZABBHUMMIDITYKEY "hum"
+#define ZABBPRESSUREKEY "pres"
+#define ZABBTEMPBMP280EKEY "Tp"
 #define BUFFERSIZE 70
 #define wdt_on true
 #define LED_CHK 4
@@ -175,11 +176,11 @@ void setup() {
 
   Serial.begin( 9600 );
   while (!Serial);
-  Serial.print("Z:");
+  Serial.print("ZS:");
   Serial.println(configData.zabbSrv);
-  Serial.print("I:");
+  Serial.print("ID:");
   Serial.println(configData.keyID);
-  Serial.print("M:");
+  Serial.print("MAC:");
   for (int i= 0; i < 6; i++) {
     Serial.print(mac[i], HEX);
     if (i < 5)
@@ -191,36 +192,53 @@ void setup() {
   while (Serial.available() == 0 && waitSerial-- > 0) {
     delay(10);
   }
+  /* Запуск конфигуратора */
   if(Serial.available() > 0) {
     if (Serial.read() == 'c') {
       while (Serial.available() > 0) Serial.read();
       Serial.print("Z:");
-      while (Serial.available() == 0);
-      String IP = Serial.readString();
       String tmp = "";
+      uint8_t tmpChr;
       byte ipADDR[4] = {0,0,0,0};
       uint8_t addrIDX = 0;
-      for (uint16_t ii = 0; ii < IP.length(); ii++) {
-        if (IP[ii] != '.') {
-          tmp = tmp + IP[ii];
-        } else {
-          ipADDR[addrIDX++] = tmp.toInt();
-          tmp = "";
+      /* Воод IP адреса сервера zabbix */
+      while(1) {
+        if(Serial.available() > 0) {
+          tmpChr = Serial.read();
+          Serial.print((char) tmpChr);
+          if (tmpChr == 46) {                 // .
+            ipADDR[addrIDX++] = tmp.toInt();
+            tmp = "";
+          } else if ((tmpChr == 13) || (tmpChr == 10)) {          // \n
+            ipADDR[addrIDX++] = tmp.toInt();
+            Serial.println();
+            break;
+          } else {
+            tmp = tmp + (char) tmpChr;
+          }
         }
       }
-      ipADDR[addrIDX] = tmp.toInt();
-      IPAddress IP1(ipADDR);
-      Serial.println(IP1);
       Serial.print("I:");
-      while (Serial.available() == 0);
-      String ID = Serial.readString();
-      Serial.println(ID);
-      configData.zabbSrv = IP1;
-      configData.keyID = ID.toInt();
+      tmp = "";
+      /* ID контроллера */
+      while(1) {
+        if(Serial.available() > 0) {
+          tmpChr = Serial.read();
+          Serial.print((char) tmpChr);
+          if ((tmpChr == 13) || (tmpChr == 10)) {
+            configData.keyID = tmp.toInt();
+            Serial.println();
+            break;
+          } else {
+            tmp = tmp + (char) tmpChr;
+          }
+        }
+      }
+      configData.zabbSrv = IPAddress(ipADDR);
       EEPROM.put(0, configData);
     }
   }
-  Serial.println("R");
+  Serial.println("Run");
   climateSensor.begin();
   pinMode(USBHOSTSS, OUTPUT);
   digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
@@ -260,7 +278,7 @@ void loop() {
     if (curTime == 0 || tmpTime - curTime > (unsigned long) ZABBIXSENDPERIOD * 1000 ) {
       curTime = tmpTime;
       rcode = Acm.SndData(sizeof(snd_buffer), snd_buffer);
-      if (rcode)
+      //if (rcode)
         //ErrorMessage<uint8_t>(PSTR("SndData"), rcode);
       delay(50);
       rcvd = BUFFERSIZE;
@@ -280,7 +298,6 @@ void loop() {
               } else {
                 sendToZabbix(ZABBRADONKEY, 30.0);
               }
-            } else {
             }
             /* Температура */
             #ifdef ZABBTEMPERATUREKEY
@@ -297,6 +314,11 @@ void loop() {
             climateSensor.takeForcedMeasurement();
             sendToZabbix(ZABBPRESSUREKEY, climateSensor.getPressure());
             #endif
+            /* Температура с bmp280 */
+            #ifdef ZABBTEMPBMP280EKEY
+            climateSensor.takeForcedMeasurement();
+            sendToZabbix(ZABBTEMPBMP280EKEY, climateSensor.getTemperatureCelsius());
+            #endif
           } else {
             delay(1000);
             curTime = 0;
@@ -304,6 +326,7 @@ void loop() {
        }
     }
   } else {
+    /* Сюда попадем при неудачной попытке подключить mr107 */
     digitalWrite(LED_CHK, HIGH);
     curTime = 0;
     if (errorCount++ > 20) {
