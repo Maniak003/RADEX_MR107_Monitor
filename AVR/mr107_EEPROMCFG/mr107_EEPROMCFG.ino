@@ -1,4 +1,6 @@
 /*
+
+Для работы с BMP280 используется библиотека BMx280MI
  
 Компилировать как Arduino Pro mini 3.3v 8MHz
 Прошивать: avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
@@ -31,7 +33,7 @@ zakaz@quarta-rad.ru
 #define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
 #define ZABBIXMAXLEN 128
 #define ZABBIXAGHOST "MR"         // Zabbix item's host name
-#define ZABBIXSENDPERIOD 300      // Period in secoonds
+#define ZABBIXSENDPERIOD 30      // Period in secoonds
 #define ZABBRADONKEY "rad"
 #define ZABBTEMPERATUREKEY "tem"
 #define ZABBHUMMIDITYKEY "hum"
@@ -45,23 +47,22 @@ zakaz@quarta-rad.ru
 #define MACADDR { 0x00, 0xAB, 0xBB, 0xCC, 0xDE, 0x02 }
 #define SERIAL_OUT
 
-#include "forcedBMX280.h"
 #include <EEPROM.h>
 #include <cdcacm.h>
 #include <usbhub.h>
 #define PIN_SPI_SS_ETHERNET_LIB 6
 #include <Ethernet.h>
 
-// Satisfy the IDE, which needs to see the include statment in the ino too.
-//#ifdef dobogusinclude
-//#include <spi4teensy3.h>
-//#endif
 #include <SPI.h>
 #if wdt_on
 #include <avr/wdt.h>
 #endif
 
-ForcedBMP280 climateSensor = ForcedBMP280();
+#ifdef ZABBTEMPBMP280EKEY
+#include <BMx280SPI.h>
+#define PIN_BMP280_CS 5
+BMx280SPI bmx280(PIN_BMP280_CS);
+#endif
 
 struct cfgData {
   uint16_t mk;
@@ -76,7 +77,7 @@ union {
 } mrdata;
 
 uint16_t rcvd = BUFFERSIZE;
-uint8_t  rec_buffer[BUFFERSIZE + 1], errorCount = 0;
+uint8_t  rec_buffer[BUFFERSIZE + 1], errorCount = 0, errorEthCount = 0;
 String str;
 unsigned long curTime = 0, tmpTime;
 
@@ -116,8 +117,16 @@ void sendToZabbix(String key, float val)
   str.getBytes(&(res[13]), ZABBIXMAXLEN - 12);
   len = len + 13;
   if (client.connect(configData.zabbSrv, ZABBIXPORT)) {
+    errorEthCount = 0;
     client.write(res, len);
-  } 
+  } else {
+    Serial.println("Eth fail");
+    digitalWrite(LED_CHK, HIGH);
+    curTime = 0;
+    if (errorEthCount++ > 3) {
+      for(;;);
+    }
+  }
   client.stop();     
 }
 
@@ -142,7 +151,7 @@ uint8_t ACMAsyncOper::OnInit(ACM *pacm) {
     lc.bParityType  = 0;
     lc.bDataBits  = 8;
     rcode = pacm->SetLineCoding(&lc);
-    if (rcode)
+    //if (rcode)
         //ErrorMessage<uint8_t>(PSTR("SetLineCoding"), rcode);
     return rcode;
 }
@@ -153,6 +162,10 @@ ACM           Acm(&Usb, &AsyncOper);
 uint8_t snd_buffer[] = {0x7b, 0xff, 0x20, 0x00, 0x06, 0x00, 0x83, 0x04, 0x00, 0x00, 0xda, 0xfb, 0x04, 0x08, 0x0c, 0x00, 0xef, 0xf7};
 
 void setup() {
+  #if wdt_on
+    MCUSR &= ~(1 << WDRF);
+    wdt_disable();
+  #endif
   pinMode(LED_CHK, OUTPUT);
   digitalWrite(LED_CHK, HIGH);
   pinMode(ETH_RESET, OUTPUT);
@@ -161,10 +174,6 @@ void setup() {
   pinMode(PIN_SPI_SS_ETHERNET_LIB, OUTPUT);
   digitalWrite(PIN_SPI_SS_ETHERNET_LIB, HIGH);
   
-  #if wdt_on
-    MCUSR &= ~(1 << WDRF);
-    wdt_disable();
-  #endif
   /* Read EEPROM */
   EEPROM.get(0, configData);
   if (configData.mk != MAGICKKEY) {
@@ -195,7 +204,8 @@ void setup() {
   /* Запуск конфигуратора */
   if(Serial.available() > 0) {
     if (Serial.read() == 'c') {
-      while (Serial.available() > 0) Serial.read();
+      Serial.flush();
+      //while (Serial.available() > 0) Serial.read();
       Serial.print("Z:");
       String tmp = "";
       uint8_t tmpChr;
@@ -239,7 +249,7 @@ void setup() {
     }
   }
   Serial.println("Run");
-  climateSensor.begin();
+
   pinMode(USBHOSTSS, OUTPUT);
   digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
   pinMode(USB_RESET, OUTPUT);
@@ -247,6 +257,14 @@ void setup() {
   digitalWrite(USB_RESET, HIGH);
   #if wdt_on
     wdt_enable(WDTO_8S);
+  #endif
+  #ifdef ZABBTEMPBMP280EKEY
+  SPI.begin();
+  if (bmx280.begin()) {
+    bmx280.resetToDefaults();
+    bmx280.writeOversamplingPressure(BMx280MI::OSRS_P_x16);
+    bmx280.writeOversamplingTemperature(BMx280MI::OSRS_T_x16);
+  }
   #endif
   Ethernet.init(PIN_SPI_SS_ETHERNET_LIB);
   #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
@@ -256,7 +274,8 @@ void setup() {
   #endif
       for(;;);
     }
-
+  Serial.print("IP:");
+  Serial.println(Ethernet.localIP());
   if (Usb.Init() == -1) {
       while ( 1 );
   }
@@ -309,15 +328,17 @@ void loop() {
             mrdata.u32 = (uint32_t) rec_buffer[39] << 24 | (uint32_t) rec_buffer[38] << 16 | (uint32_t) rec_buffer[37] << 8 | (uint32_t) rec_buffer[36];
             sendToZabbix(ZABBHUMMIDITYKEY, mrdata.flt);
             #endif
-            /* Давление с bmp280 */
-            #ifdef ZABBPRESSUREKEY
-            climateSensor.takeForcedMeasurement();
-            sendToZabbix(ZABBPRESSUREKEY, climateSensor.getPressure());
-            #endif
-            /* Температура с bmp280 */
-            #ifdef ZABBTEMPBMP280EKEY
-            climateSensor.takeForcedMeasurement();
-            sendToZabbix(ZABBTEMPBMP280EKEY, climateSensor.getTemperatureCelsius());
+            /* Давление и температура с bmp280 */
+            #if defined(ZABBPRESSUREKEY) && defined(ZABBTEMPBMP280EKEY)
+            if (bmx280.measure()) {
+              if (bmx280.hasValue()) {
+                Serial.print("P: "); Serial.println(bmx280.getPressure());
+                //Serial.print("P: "); Serial.println(bmx280.getPressure64());
+                Serial.print("T: "); Serial.println(bmx280.getTemperature());
+                //sendToZabbix(ZABBPRESSUREKEY, bmx280.getPressure());
+                //sendToZabbix(ZABBTEMPBMP280EKEY,bmx280.getTemperature() );
+              }
+            }
             #endif
           } else {
             delay(1000);
@@ -327,6 +348,7 @@ void loop() {
     }
   } else {
     /* Сюда попадем при неудачной попытке подключить mr107 */
+    Serial.println("ACM fail");
     digitalWrite(LED_CHK, HIGH);
     curTime = 0;
     if (errorCount++ > 20) {

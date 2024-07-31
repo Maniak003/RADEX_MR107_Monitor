@@ -4,6 +4,8 @@ if [ -z "$1" ]; then
 	echo "Usage $0 <HEX file>"
 	exit 0
 fi
-avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./$1:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
+#avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./$1:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
 #avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./$1:i -Ulock:w:0x3F:m -Uefuse:w:0xFD:m -Uhfuse:w:0xDE:m -Ulfuse:w:0xFF:m
 #avrdude -p mega328p -c stk500 -P /dev/ttyUSB0 -U lfuse:w:0xE2:m -U hfuse:w:0x5F:m -U efuse:w:0xFF:m -U flash:w:./$1:i
+avrdude -p m328p -c stk500pp -P /dev/ttyUSB0 -U flash:w:./$1:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
+
