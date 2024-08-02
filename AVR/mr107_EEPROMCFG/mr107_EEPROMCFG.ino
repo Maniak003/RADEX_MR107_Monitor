@@ -2,7 +2,7 @@
 
 Для работы с BMP280 используется библиотека BMx280MI
  
-Компилировать как Arduino Pro mini 3.3v 8MHz
+Компилировать как MiniCore 3.3v 8MHz
 Прошивать: avrdude -B 125kHz -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
 
 Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
@@ -47,6 +47,7 @@ zakaz@quarta-rad.ru
 #define MACADDR { 0x00, 0xAB, 0xBB, 0xCC, 0xDE, 0x02 }
 #define SERIAL_OUT
 
+//#include <Wire.h>
 #include <EEPROM.h>
 #include <cdcacm.h>
 #include <usbhub.h>
@@ -80,7 +81,7 @@ uint16_t rcvd = BUFFERSIZE;
 uint8_t  rec_buffer[BUFFERSIZE + 1], errorCount = 0, errorEthCount = 0;
 String str;
 unsigned long curTime = 0, tmpTime;
-bool bme280active = false;
+bool bmp280active = false;
 
 #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
   ;
@@ -121,7 +122,7 @@ void sendToZabbix(String key, float val)
     errorEthCount = 0;
     client.write(res, len);
   } else {
-    Serial.println("Eth fail");
+    //Serial.println("Eth fail");
     digitalWrite(LED_CHK, HIGH);
     curTime = 0;
     if (errorEthCount++ > 3) {
@@ -186,18 +187,17 @@ void setup() {
 
   Serial.begin( 9600 );
   while (!Serial);
-  Serial.print("ZS:");
+  //Serial.print("Z");
   Serial.println(configData.zabbSrv);
-  Serial.print("ID:");
+  //Serial.print("I");
   Serial.println(configData.keyID);
-  Serial.print("MAC:");
   for (int i= 0; i < 6; i++) {
     Serial.print(mac[i], HEX);
     if (i < 5)
       Serial.print(":");
   }
   Serial.println();
-  Serial.println("c - config");
+  Serial.println("c-cfg");
   int waitSerial = 200;
   while (Serial.available() == 0 && waitSerial-- > 0) {
     delay(10);
@@ -206,11 +206,10 @@ void setup() {
   if(Serial.available() > 0) {
     if (Serial.read() == 'c') {
       Serial.flush();
-      //while (Serial.available() > 0) Serial.read();
       Serial.print("Z:");
       String tmp = "";
       uint8_t tmpChr;
-      byte ipADDR[4] = {0,0,0,0};
+      //byte ipADDR[4] = {0,0,0,0};
       uint8_t addrIDX = 0;
       /* Воод IP адреса сервера zabbix */
       while(1) {
@@ -218,10 +217,10 @@ void setup() {
           tmpChr = Serial.read();
           Serial.print((char) tmpChr);
           if (tmpChr == 46) {                 // .
-            ipADDR[addrIDX++] = tmp.toInt();
+            configData.zabbSrv[addrIDX++] = tmp.toInt();
             tmp = "";
           } else if ((tmpChr == 13) || (tmpChr == 10)) {          // \n
-            ipADDR[addrIDX++] = tmp.toInt();
+            configData.zabbSrv[addrIDX++] = tmp.toInt();
             Serial.println();
             break;
           } else {
@@ -245,14 +244,14 @@ void setup() {
           }
         }
       }
-      configData.zabbSrv = IPAddress(ipADDR);
+      //configData.zabbSrv = IPAddress(ipADDR);
       EEPROM.put(0, configData);
     }
   }
-  Serial.println("Run");
+  //Serial.println("Run");
 
-  pinMode(USBHOSTSS, OUTPUT);
-  digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
+  //pinMode(USBHOSTSS, OUTPUT);
+  //digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
   pinMode(USB_RESET, OUTPUT);
   digitalWrite(USB_RESET, LOW);
   digitalWrite(USB_RESET, HIGH);
@@ -260,13 +259,12 @@ void setup() {
     wdt_enable(WDTO_8S);
   #endif
   #ifdef ZABBTEMPBMP280EKEY
-  Wire.begin();
   if (bmx280.begin()) {
     bmx280.resetToDefaults();
     bmx280.writeOversamplingPressure(BMx280MI::OSRS_P_x16);
     bmx280.writeOversamplingTemperature(BMx280MI::OSRS_T_x16);
+    bmp280active = true;
   }
-  
   #endif
   Ethernet.init(PIN_SPI_SS_ETHERNET_LIB);
   #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
@@ -276,13 +274,14 @@ void setup() {
   #endif
       for(;;);
     }
-  Serial.print("IP:");
+  //Serial.print("IP:");
   Serial.println(Ethernet.localIP());
   if (Usb.Init() == -1) {
-      while ( 1 );
+    //Serial.println("e2");
+      //while ( 1 );
   }
-  digitalWrite(LED_CHK, LOW);
-  delay( 200 );
+  //digitalWrite(LED_CHK, LOW);
+  //delay( 200 );
 }
 
 void loop() {
@@ -303,8 +302,9 @@ void loop() {
         //ErrorMessage<uint8_t>(PSTR("SndData"), rcode);
       delay(50);
       rcvd = BUFFERSIZE;
-      for (uint16_t i = 0; i < sizeof(rec_buffer); i++)
-        rec_buffer[i] = 0;
+      //for (uint16_t i = 0; i < sizeof(rec_buffer); i++)
+      //  rec_buffer[i] = 0;
+      memset(rec_buffer, 0, sizeof(rec_buffer));
       rcode = Acm.RcvData(&rcvd, rec_buffer);
        if (rcode && rcode != hrNAK) {
           //ErrorMessage<uint8_t>(PSTR("Ret"), rcode);
@@ -332,22 +332,27 @@ void loop() {
             #endif
             /* Давление и температура с bmp280 */
             #if defined(ZABBPRESSUREKEY) && defined(ZABBTEMPBMP280EKEY)
-            if (!bmx280.measure()) {
+            if (bmp280active && bmx280.measure()) {
               while (!bmx280.hasValue());
-              Serial.print("Pressure: "); Serial.println(bmx280.getPressure());
+              sendToZabbix(ZABBPRESSUREKEY, bmx280.getPressure());
+              //sendToZabbix(ZABBTEMPBMP280EKEY, bmx280.getTemperature());
             }
             #endif
           } else {
             delay(1000);
-            curTime = 0;
+            curTime = 0;    // Обнулим интервал в случае ошибки, что бы ускорить перезапрос данных.
           }
        }
     }
   } else {
+    /*if (bmp280active && bmx280.measure()) {
+      while (!bmx280.hasValue());
+      Serial.println(bmx280.getPressure());
+    }*/
     /* Сюда попадем при неудачной попытке подключить mr107 */
-    Serial.println("ACM fail");
+    Serial.println("e3");
     digitalWrite(LED_CHK, HIGH);
-    curTime = 0;
+    curTime = 0;    // Обнулим интервал в случае ошибки, что бы ускорить перезапрос данных.
     if (errorCount++ > 20) {
       for(;;);
     }
