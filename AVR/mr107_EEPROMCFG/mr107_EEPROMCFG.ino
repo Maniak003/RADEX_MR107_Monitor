@@ -42,7 +42,7 @@ zakaz@quarta-rad.ru
 #define BUFFERSIZE 70
 #define wdt_on true
 #define LED_CHK 4
-#define ETH_RESET A4
+#define ETH_RESET 5
 #define USB_RESET 10
 #define MACADDR { 0x00, 0xAB, 0xBB, 0xCC, 0xDE, 0x02 }
 #define SERIAL_OUT
@@ -59,9 +59,9 @@ zakaz@quarta-rad.ru
 #endif
 
 #ifdef ZABBTEMPBMP280EKEY
-#include <BMx280SPI.h>
-#define PIN_BMP280_CS 5
-BMx280SPI bmx280(PIN_BMP280_CS);
+#include <BMx280I2C.h>
+#define I2C_ADDRESS 0x76
+BMx280I2C bmx280(I2C_ADDRESS);
 #endif
 
 struct cfgData {
@@ -80,6 +80,7 @@ uint16_t rcvd = BUFFERSIZE;
 uint8_t  rec_buffer[BUFFERSIZE + 1], errorCount = 0, errorEthCount = 0;
 String str;
 unsigned long curTime = 0, tmpTime;
+bool bme280active = false;
 
 #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
   ;
@@ -259,12 +260,13 @@ void setup() {
     wdt_enable(WDTO_8S);
   #endif
   #ifdef ZABBTEMPBMP280EKEY
-  SPI.begin();
+  Wire.begin();
   if (bmx280.begin()) {
     bmx280.resetToDefaults();
     bmx280.writeOversamplingPressure(BMx280MI::OSRS_P_x16);
     bmx280.writeOversamplingTemperature(BMx280MI::OSRS_T_x16);
   }
+  
   #endif
   Ethernet.init(PIN_SPI_SS_ETHERNET_LIB);
   #if defined(WIZ550io_WITH_MACADDRESS) // Use assigned MAC address of WIZ550io
@@ -330,14 +332,9 @@ void loop() {
             #endif
             /* Давление и температура с bmp280 */
             #if defined(ZABBPRESSUREKEY) && defined(ZABBTEMPBMP280EKEY)
-            if (bmx280.measure()) {
-              if (bmx280.hasValue()) {
-                Serial.print("P: "); Serial.println(bmx280.getPressure());
-                //Serial.print("P: "); Serial.println(bmx280.getPressure64());
-                Serial.print("T: "); Serial.println(bmx280.getTemperature());
-                //sendToZabbix(ZABBPRESSUREKEY, bmx280.getPressure());
-                //sendToZabbix(ZABBTEMPBMP280EKEY,bmx280.getTemperature() );
-              }
+            if (!bmx280.measure()) {
+              while (!bmx280.hasValue());
+              Serial.print("Pressure: "); Serial.println(bmx280.getPressure());
             }
             #endif
           } else {
