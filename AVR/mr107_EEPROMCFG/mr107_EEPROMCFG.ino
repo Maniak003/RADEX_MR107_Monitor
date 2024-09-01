@@ -3,8 +3,8 @@
 Для работы с BMP280 используется библиотека BMx280MI
  
 Компилировать как MiniCore 3.3v 8MHz
-Прошивать: avrdude -B 125kHz  -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
-
+Прошивать:  avrdude -B 125kHz  -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
+            avrdude -p m328p -c stk500pp -P /dev/ttyUSB0 -U flash:w:./$1:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
 Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
 
 Сырые данные при горячем старте:
@@ -30,7 +30,8 @@ zakaz@quarta-rad.ru
 #define MAGICKKEY 0x1234          // Magick key
 #define USBHOSTSS 7               // Need relocate from 10 to 7 on USB host shield.
 #define ZABBIXPORT 10051          // Zabbix server Port
-#define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
+//#define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
+#define ZABBIXADDR {109,107,189,186}  // Zabbix server IP, comma separated
 #define ZABBIXMAXLEN 128
 #define ZABBIXAGHOST "MR"         // Zabbix item's host name
 #define ZABBIXSENDPERIOD 30      // Period in secoonds
@@ -44,7 +45,7 @@ zakaz@quarta-rad.ru
 #define LED_CHK 4
 #define ETH_RESET 5
 #define USB_RESET 10
-#define MACADDR { 0x00, 0xAB, 0xBB, 0xCC, 0xDE, 0x02 }
+#define MACADDR { 0x00, 0xAB, 0xBC, 0xCD, 0xDE, 0x10 }
 #define SERIAL_OUT
 
 //#include <Wire.h>
@@ -248,10 +249,10 @@ void setup() {
       EEPROM.put(0, configData);
     }
   }
-  //Serial.println("Run");
+  Serial.println("Run");
 
-  //pinMode(USBHOSTSS, OUTPUT);
-  //digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
+  pinMode(USBHOSTSS, OUTPUT);
+  digitalWrite(USBHOSTSS, HIGH); // Disable SS fo USB host.
   pinMode(USB_RESET, OUTPUT);
   digitalWrite(USB_RESET, LOW);
   digitalWrite(USB_RESET, HIGH);
