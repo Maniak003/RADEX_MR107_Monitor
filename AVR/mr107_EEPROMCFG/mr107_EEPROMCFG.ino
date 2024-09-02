@@ -30,8 +30,7 @@ zakaz@quarta-rad.ru
 #define MAGICKKEY 0x1234          // Magick key
 #define USBHOSTSS 7               // Need relocate from 10 to 7 on USB host shield.
 #define ZABBIXPORT 10051          // Zabbix server Port
-//#define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
-#define ZABBIXADDR {109,107,189,186}  // Zabbix server IP, comma separated
+#define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
 #define ZABBIXMAXLEN 128
 #define ZABBIXAGHOST "MR"         // Zabbix item's host name
 #define ZABBIXSENDPERIOD 30      // Period in secoonds
