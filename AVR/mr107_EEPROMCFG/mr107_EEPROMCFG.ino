@@ -28,7 +28,7 @@ D2 D0 00 00 00 00
 #define MAGICKKEY 0x1234              // Magick key
 #define USBHOSTSS 7                   // Need relocate from 10 to 7 on USB host shield.
 #define ZABBIXPORT 10051              // Zabbix server Port
-#define ZABBIXADDR {109,107,189,186}  // Zabbix server IP, comma separated
+#define ZABBIXADDR {192,168,1,1}  // Zabbix server IP, comma separated
 #define ZABBIXMAXLEN 128
 #define ZABBIXAGHOST "MR"             // Zabbix item's host name
 #define ZABBIXSENDPERIOD 600          // Period in secoonds
@@ -42,7 +42,7 @@ D2 D0 00 00 00 00
 #define LED_CHK 4
 #define ETH_RESET 5
 #define USB_RESET 10
-#define MACADDR { 0x00, 0xAB, 0xBC, 0xCD, 0xDE, 0x10 }
+#define MACADDR { 0x00, 0xAB, 0xBC, 0xCD, 0xDE, 0x0A }
 #define SERIAL_OUT
 
 //#include <Wire.h>
