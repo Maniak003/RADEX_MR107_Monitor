@@ -1,11 +1,11 @@
 /*
+Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
 
 Для работы с BMP280 используется библиотека BMx280MI
  
 Компилировать как MiniCore 3.3v 8MHz
 Прошивать:  avrdude -B 125kHz  -p m328p -c usbasp  -U flash:w:./file.hex:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
             avrdude -p m328p -c stk500pp -P /dev/ttyUSB0 -U flash:w:./$1:i -Uefuse:w:0xFD:m -Uhfuse:w:0xDA:m -Ulfuse:w:0xFF:m
-Монитор для RADEX MR107+ (VID: abba PID: a104) с регистрацией в zabbix
 
 Сырые данные при горячем старте:
 
@@ -23,17 +23,15 @@ D2 D0 00 00 00 00
 00 00 00 00 00 00 00 00 00 00 00 00 CA 45 47 47
 35 38 00 00 00 00
 
-zakaz@quarta-rad.ru
-
 */
 
-#define MAGICKKEY 0x1234          // Magick key
-#define USBHOSTSS 7               // Need relocate from 10 to 7 on USB host shield.
-#define ZABBIXPORT 10051          // Zabbix server Port
-#define ZABBIXADDR {192,168,1,6}  // Zabbix server IP, comma separated
+#define MAGICKKEY 0x1234              // Magick key
+#define USBHOSTSS 7                   // Need relocate from 10 to 7 on USB host shield.
+#define ZABBIXPORT 10051              // Zabbix server Port
+#define ZABBIXADDR {109,107,189,186}  // Zabbix server IP, comma separated
 #define ZABBIXMAXLEN 128
-#define ZABBIXAGHOST "MR"         // Zabbix item's host name
-#define ZABBIXSENDPERIOD 30      // Period in secoonds
+#define ZABBIXAGHOST "MR"             // Zabbix item's host name
+#define ZABBIXSENDPERIOD 600          // Period in secoonds
 #define ZABBRADONKEY "rad"
 #define ZABBTEMPERATUREKEY "tem"
 #define ZABBHUMMIDITYKEY "hum"
