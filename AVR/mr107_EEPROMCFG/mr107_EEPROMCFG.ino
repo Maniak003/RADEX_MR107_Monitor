@@ -185,9 +185,7 @@ void setup() {
 
   Serial.begin( 9600 );
   while (!Serial);
-  //Serial.print("Z");
   Serial.println(configData.zabbSrv);
-  //Serial.print("I");
   Serial.println(configData.keyID);
   for (int i= 0; i < 6; i++) {
     Serial.print(mac[i], HEX);
@@ -203,7 +201,10 @@ void setup() {
   /* Запуск конфигуратора */
   if(Serial.available() > 0) {
     if (Serial.read() == 'c') {
-      Serial.flush();
+      //Serial.flush();
+      while (Serial.available() > 0) {
+        Serial.read();
+      }
       Serial.print("Z:");
       String tmp = "";
       uint8_t tmpChr;
