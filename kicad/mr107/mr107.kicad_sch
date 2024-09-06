@@ -5513,8 +5513,8 @@
     (pin "7" (uuid f0f2bb50-ae94-401b-a32a-f8bcb51a908c))
     (pin "8" (uuid fb51e4b3-6468-439a-9e84-26ede101ddc6))
     (pin "9" (uuid 827e153d-e58b-4062-9079-faaa34165d7d))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca4))
-    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca4))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca5))
+    (pin "s" (uuid d51f42b8-a9b2-4961-8835-f724bd68dca5))
   )
 
   (symbol (lib_id "Device:LED") (at 152.4 29.845 90) (unit 1)
